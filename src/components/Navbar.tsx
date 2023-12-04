@@ -1,5 +1,7 @@
-
+import React from 'react';
 import {
+  ChakraProvider,
+  ColorModeScript,
   Box,
   Flex,
   Avatar,
@@ -13,41 +15,21 @@ import {
   Stack,
   useColorMode,
   Center,
-} from '@chakra-ui/react'
-import logo from '../assets/dipakLogo.png'
-import { MoonIcon, SunIcon } from '@chakra-ui/icons'
-
-// interface Props {
-//   children: React.ReactNode
-// }
-
-// const NavLink = (props: Props) => {
-//   const { children } = props
-
-//   return (
-//     <Box
-//       as="a"
-//       px={2}
-//       py={1}
-//       rounded={'md'}
-//       _hover={{
-//         textDecoration: 'none',
-//         bg: useColorModeValue('gray.200', 'gray.700'),
-//       }}
-//       href={'#'}>
-//       {children}
-//     </Box>
-//   )
-// }
+} from '@chakra-ui/react';
+import { MoonIcon, SunIcon } from '@chakra-ui/icons';
+import logo from '../assets/dipakLogo.png';
 
 export default function Navbar() {
-  const { colorMode, toggleColorMode } = useColorMode()
+  const { colorMode, toggleColorMode } = useColorMode();
+
   return (
-    <>
+    <ChakraProvider resetCSS>
+      <ColorModeScript initialColorMode={colorMode} />
+
       <Box bg={useColorModeValue('gray.100', 'gray.900')} px={5} py={3}>
         <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
           <Box>
-            <img src={logo} alt="logo" width={"80px"}/>
+            <img src={logo} alt="logo" width={'80px'} />
           </Box>
 
           <Flex alignItems={'center'}>
@@ -91,6 +73,6 @@ export default function Navbar() {
           </Flex>
         </Flex>
       </Box>
-    </>
-  )
+    </ChakraProvider>
+  );
 }
