@@ -1,13 +1,11 @@
 import {
   Box,
   Button,
-  ButtonGroup,
   Card,
   CardBody,
   CardFooter,
   CardHeader,
   Container,
-  Divider,
   Flex,
   Heading,
   Img,
@@ -15,8 +13,9 @@ import {
   Select,
   SimpleGrid,
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 type ProductType = {
   id: number;
@@ -31,13 +30,27 @@ type ProductType = {
   thumbnail: string;
   images: [];
 };
+interface SearchParamsType {
+  skip: number;
+  limit: number;
+}
 
 export default function ProductPage() {
   const [productData, setProductData] = useState<ProductType[] | null>(null);
+
+  const [searchParams,setSearchParams] = useSearchParams<SearchParamsType>({skip:0,limit:3}) 
+
+  const skip = parseInt(searchParams.get("skip") || 0);
+  const limit = parseInt(searchParams.get("limit") || 3);
+
+
+  const [search,setSearch] = useState('');
+
+
   const { data: product } = useQuery({
-    queryKey: ["product"],
+    queryKey: ["product",limit,skip],
     queryFn: async () => {
-      return await fetch("https://dummyjson.com/products").then((res) =>
+      return await fetch(`https://dummyjson.com/products?limit=${limit}&skip=${skip}`).then((res) =>
         res.json()
       );
     },
@@ -56,14 +69,27 @@ export default function ProductPage() {
         (res) => res.json()
       );
     },
+    placeholderData:keepPreviousData
   });
 
+
+
+  const handleMove  = (count:number) =>{  
+
+    setSearchParams((prev) =>{
+      searchParams.set("skip",Math.max(skip + count,0))
+      return prev;
+    })
+      // setSkip((prevSkip) =>{
+      //   return Math.max(prevSkip + count,0)
+      // })
+  }
   return (
     <>
       <Container mt="14px">
         <Flex gap="25px">
           <Box>
-            <Input type="text" placeholder="Search product here ....." />
+            <Input type="text" placeholder="Search product here ....." name="search" onChange={(e) => setSearch(e.target.value)}/>
           </Box>
           <Box>
             <Select placeholder="Select the Category">
@@ -108,6 +134,14 @@ export default function ProductPage() {
             );
           })}
       </SimpleGrid>
+
+
+     <Container>
+     <Flex gap={"20px"} justifyContent={"space-between"} my={"20px"}>
+        <Button onClick={() => handleMove(-limit)}>Prev</Button>
+        <Button onClick={() => handleMove(limit)}>Next</Button>
+      </Flex>
+     </Container>
     </>
   );
 }
