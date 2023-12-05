@@ -16,7 +16,7 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type ProductType = {
   id: number;
@@ -32,6 +32,7 @@ type ProductType = {
   images: [];
 };
 export default function ProductPage() {
+    const [proudctData,setProductData] = useState<ProductType[] | null>(null);
   const { data: product } = useQuery({
     queryKey: ["product"],
     queryFn: async () => {
@@ -40,6 +41,12 @@ export default function ProductPage() {
       );
     },
   });
+
+  useEffect(() => {
+    if (product) {
+      setProductData(product);
+    }
+  }, [product]);
 
   const { data: categories } = useQuery({
     queryKey: ["categories"],
@@ -75,39 +82,22 @@ export default function ProductPage() {
         px="15px"
         mt="20px"
       >
-        <Card>
-          <CardHeader>
-            <Heading size="md"> Customer dashboard</Heading>
-          </CardHeader>
-          <CardBody>
-            <p>View a summary of all your customers over the last month.</p>
-          </CardBody>
-          <CardFooter>
-            <Button>View here</Button>
-          </CardFooter>
-        </Card>
-        <Card>
-          <CardHeader>
-            <Heading size="md"> Customer dashboard</Heading>
-          </CardHeader>
-          <CardBody>
-            <p>View a summary of all your customers over the last month.</p>
-          </CardBody>
-          <CardFooter>
-            <Button>View here</Button>
-          </CardFooter>
-        </Card>
-        <Card>
-          <CardHeader>
-            <Heading size="md"> Customer dashboard</Heading>
-          </CardHeader>
-          <CardBody>
-            <p>View a summary of all your customers over the last month.</p>
-          </CardBody>
-          <CardFooter>
-            <Button>View here</Button>
-          </CardFooter>
-        </Card>
+        {proudctData && proudctData?.products?.map((product: ProductType) => {
+          return (
+            <Card>
+              <img src={product?.thumbnail} alt={product?.title} />
+              <CardHeader>
+                <Heading size="md"> {product?.title}</Heading>
+              </CardHeader>
+              <CardBody>
+                <p>{product?.description}</p>
+              </CardBody>
+              <CardFooter>
+                <Button>View here</Button>
+              </CardFooter>
+            </Card>
+          );
+        })}
       </SimpleGrid>
     </>
   );
