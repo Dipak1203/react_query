@@ -16,7 +16,7 @@ import {
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-
+import debounce from "lodash.debounce";
 type ProductType = {
   id: number;
   title: string;
@@ -38,21 +38,21 @@ interface SearchParamsType {
 export default function ProductPage() {
   const [productData, setProductData] = useState<ProductType[] | null>(null);
 
-  const [searchParams,setSearchParams] = useSearchParams<SearchParamsType>({skip:0,limit:3}) 
+  const [searchParams, setSearchParams] = useSearchParams<SearchParamsType>({
+    skip: 0,
+    limit: 3,
+  });
 
-  const skip : number = parseInt(searchParams.get("skip") || 0);
+  const skip: number = parseInt(searchParams.get("skip") || 0);
   const limit = parseInt(searchParams.get("limit") || 3);
-  const searchQuery = searchParams.get("q") || '';
-
-
-
+  const searchQuery = searchParams.get("q") || "";
 
   const { data: product } = useQuery({
-    queryKey: ["product",limit,skip,searchQuery],
+    queryKey: ["product", limit, skip, searchQuery],
     queryFn: async () => {
-      return await fetch(`https://dummyjson.com/products/search?limit=${limit}&skip=${skip}&q=${searchQuery}`).then((res) =>
-        res.json()
-      );
+      return await fetch(
+        `https://dummyjson.com/products/search?limit=${limit}&skip=${skip}&q=${searchQuery}`
+      ).then((res) => res.json());
     },
   });
 
@@ -69,33 +69,35 @@ export default function ProductPage() {
         (res) => res.json()
       );
     },
-    placeholderData:keepPreviousData
+    placeholderData: keepPreviousData,
   });
 
-
-
-  const handleMove  = (count:number) =>{  
-
-    setSearchParams((prev) =>{
-      searchParams.set("skip",Math.max(skip + count,0))
+  const handleMove = (count: number) => {
+    setSearchParams((prev) => {
+      searchParams.set("skip", Math.max(skip + count, 0));
       return prev;
-    })
-      // setSkip((prevSkip) =>{
-      //   return Math.max(prevSkip + count,0)
-      // })
-  }
+    });
+    // setSkip((prevSkip) =>{
+    //   return Math.max(prevSkip + count,0)
+    // })
+  };
   return (
     <>
       <Container mt="14px">
         <Flex gap="25px">
           <Box>
-            <Input type="text" placeholder="Search product here ....." name="search" onChange={(e) => 
-              setSearchParams((prev) =>{
-                prev.set('q',e.target.value);
-                prev.set('skip',0);
-                return prev;
-              })
-            }/>
+            <Input
+              type="text"
+              placeholder="Search product here ....."
+              name="search"
+              onChange={debounce((e:any) => {
+                setSearchParams((prev) => {
+                  prev.set("q", e.target.value);
+                  prev.set("skip", 0);
+                  return prev;
+                });
+              },1000)}
+            />
           </Box>
           <Box>
             <Select placeholder="Select the Category">
@@ -141,13 +143,12 @@ export default function ProductPage() {
           })}
       </SimpleGrid>
 
-
-     <Container>
-     <Flex gap={"20px"} justifyContent={"space-between"} my={"20px"}>
-        <Button onClick={() => handleMove(-limit)}>Prev</Button>
-        <Button onClick={() => handleMove(limit)}>Next</Button>
-      </Flex>
-     </Container>
+      <Container>
+        <Flex gap={"20px"} justifyContent={"space-between"} my={"20px"}>
+          <Button onClick={() => handleMove(-limit)}>Prev</Button>
+          <Button onClick={() => handleMove(limit)}>Next</Button>
+        </Flex>
+      </Container>
     </>
   );
 }
