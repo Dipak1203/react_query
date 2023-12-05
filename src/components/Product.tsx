@@ -40,17 +40,17 @@ export default function ProductPage() {
 
   const [searchParams,setSearchParams] = useSearchParams<SearchParamsType>({skip:0,limit:3}) 
 
-  const skip = parseInt(searchParams.get("skip") || 0);
+  const skip : number = parseInt(searchParams.get("skip") || 0);
   const limit = parseInt(searchParams.get("limit") || 3);
+  const searchQuery = searchParams.get("q") || '';
 
 
-  const [search,setSearch] = useState('');
 
 
   const { data: product } = useQuery({
-    queryKey: ["product",limit,skip],
+    queryKey: ["product",limit,skip,searchQuery],
     queryFn: async () => {
-      return await fetch(`https://dummyjson.com/products?limit=${limit}&skip=${skip}`).then((res) =>
+      return await fetch(`https://dummyjson.com/products/search?limit=${limit}&skip=${skip}&q=${searchQuery}`).then((res) =>
         res.json()
       );
     },
@@ -89,7 +89,13 @@ export default function ProductPage() {
       <Container mt="14px">
         <Flex gap="25px">
           <Box>
-            <Input type="text" placeholder="Search product here ....." name="search" onChange={(e) => setSearch(e.target.value)}/>
+            <Input type="text" placeholder="Search product here ....." name="search" onChange={(e) => 
+              setSearchParams((prev) =>{
+                prev.set('q',e.target.value);
+                prev.set('skip',0);
+                return prev;
+              })
+            }/>
           </Box>
           <Box>
             <Select placeholder="Select the Category">
