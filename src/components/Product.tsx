@@ -10,10 +10,10 @@ import {
   Divider,
   Flex,
   Heading,
+  Img,
   Input,
   Select,
   SimpleGrid,
-  Stack,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -31,8 +31,9 @@ type ProductType = {
   thumbnail: string;
   images: [];
 };
+
 export default function ProductPage() {
-    const [proudctData,setProductData] = useState<ProductType[] | null>(null);
+  const [productData, setProductData] = useState<ProductType[] | null>(null);
   const { data: product } = useQuery({
     queryKey: ["product"],
     queryFn: async () => {
@@ -56,7 +57,7 @@ export default function ProductPage() {
       );
     },
   });
-  console.log(product);
+
   return (
     <>
       <Container mt="14px">
@@ -66,9 +67,9 @@ export default function ProductPage() {
           </Box>
           <Box>
             <Select placeholder="Select the Category">
-              {categories?.map((categories: [], index: number) => (
-                <option value={categories} key={index}>
-                  {categories}
+              {categories?.map((category: string, index: number) => (
+                <option value={category} key={index}>
+                  {category}
                 </option>
               ))}
             </Select>
@@ -82,22 +83,30 @@ export default function ProductPage() {
         px="15px"
         mt="20px"
       >
-        {proudctData && proudctData?.products?.map((product: ProductType) => {
-          return (
-            <Card>
-              <img src={product?.thumbnail} alt={product?.title} />
-              <CardHeader>
-                <Heading size="md"> {product?.title}</Heading>
-              </CardHeader>
-              <CardBody>
-                <p>{product?.description}</p>
-              </CardBody>
-              <CardFooter>
-                <Button>View here</Button>
-              </CardFooter>
-            </Card>
-          );
-        })}
+        {productData &&
+          productData?.products?.map((product: ProductType) => {
+            return (
+              <Card key={product.id} height="100%">
+                <Img
+                  src={product.thumbnail}
+                  alt={product.title}
+                  w="100%"
+                  h="200px" // Set a fixed height for the image
+                  objectFit="cover" // Maintain aspect ratio
+                />
+                <CardHeader>
+                  <Heading size="md">{product.title}</Heading>
+                </CardHeader>
+                <CardBody>
+                  <p>{product.description}</p>
+                </CardBody>
+                <CardFooter justifyContent="space-between">
+                  <Button bg="green">Add to Cart</Button>
+                  <Button>View</Button>
+                </CardFooter>
+              </Card>
+            );
+          })}
       </SimpleGrid>
     </>
   );
