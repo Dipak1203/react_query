@@ -38,14 +38,14 @@ interface SearchParamsType {
 export default function ProductPage() {
   const [productData, setProductData] = useState<ProductType[] | null>(null);
 
-  const [searchParams, setSearchParams] = useSearchParams<SearchParamsType>({
+  const [searchParams, setSearchParams]= useSearchParams<any>({
     skip: 0,
     limit: 3,
   });
 
-  const skip: number = parseInt(searchParams.get("skip") || 0);
-  const limit = parseInt(searchParams.get("limit") || 3);
-  const searchQuery = searchParams.get("q") || "";
+  const skip:any = parseInt(searchParams.get("skip") || 0);
+  const limit:any = parseInt(searchParams.get("limit") || 3);
+  const searchQuery:any= searchParams.get("q") || "";
 
   const { data: product } = useQuery({
     queryKey: ["product", limit, skip, searchQuery],
@@ -90,13 +90,13 @@ export default function ProductPage() {
               type="text"
               placeholder="Search product here ....."
               name="search"
-              onChange={debounce((e:any) => {
+              onChange={debounce((e: any) => {
                 setSearchParams((prev) => {
                   prev.set("q", e.target.value);
                   prev.set("skip", 0);
                   return prev;
                 });
-              },1000)}
+              }, 1000)}
             />
           </Box>
           <Box>
