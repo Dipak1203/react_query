@@ -30,20 +30,23 @@ type ProductType = {
   thumbnail: string;
   images: [];
 };
-interface SearchParamsType {
-  skip: number;
-  limit: number;
-}
+// interface SearchParamsType {
+//   skip: number;
+//   limit: number;
+// }
 
 export default function ProductPage() {
   const [productData, setProductData] = useState<ProductType[] | null>(null);
 
-  const [searchParams, setSearchParams]= useSearchParams<any>({
+  // @ts-ignore
+  const [searchParams, setSearchParams]= useSearchParams({
     skip: 0,
     limit: 3,
   });
 
+  // @ts-ignore
   const skip:any = parseInt(searchParams.get("skip") || 0);
+   // @ts-ignore
   const limit:any = parseInt(searchParams.get("limit") || 3);
   const searchQuery:any= searchParams.get("q") || "";
 
@@ -74,6 +77,7 @@ export default function ProductPage() {
 
   const handleMove = (count: number) => {
     setSearchParams((prev) => {
+       // @ts-ignore
       searchParams.set("skip", Math.max(skip + count, 0));
       return prev;
     });
@@ -93,6 +97,7 @@ export default function ProductPage() {
               onChange={debounce((e: any) => {
                 setSearchParams((prev) => {
                   prev.set("q", e.target.value);
+                  // @ts-ignore
                   prev.set("skip", 0);
                   return prev;
                 });
@@ -118,6 +123,7 @@ export default function ProductPage() {
         mt="20px"
       >
         {productData &&
+        // @ts-ignore
           productData?.products?.map((product: ProductType) => {
             return (
               <Card key={product.id} height="100%">
