@@ -39,25 +39,36 @@ export default function ProductPage() {
   const [productData, setProductData] = useState<ProductType[] | null>(null);
 
   // @ts-ignore
-  const [searchParams, setSearchParams]= useSearchParams({
+  const [searchParams, setSearchParams] = useSearchParams({
     skip: 0,
     limit: 3,
   });
 
   // @ts-ignore
-  const skip:any = parseInt(searchParams.get("skip") || 0);
-   // @ts-ignore
-  const limit:any = parseInt(searchParams.get("limit") || 3);
-  const searchQuery:any= searchParams.get("q") || "";
+  const skip: any = parseInt(searchParams.get("skip") || 0);
+  // @ts-ignore
+  const limit: any = parseInt(searchParams.get("limit") || 3);
+  const searchQuery: any = searchParams.get("q") || "";
+  const category = searchParams.get("category");
 
   const { data: product } = useQuery({
-    queryKey: ["product", limit, skip, searchQuery],
+    queryKey: ["product", limit, skip, searchQuery, category],
     queryFn: async () => {
-      return await fetch(
-        `https://dummyjson.com/products/search?limit=${limit}&skip=${skip}&q=${searchQuery}`
-      ).then((res) => res.json());
+      // return await fetch(
+      //   `https://dummyjson.com/products/search?limit=${limit}&skip=${skip}&q=${searchQuery}`
+      // ).then((res) => res.json());
+
+      let url = `https://dummyjson.com/products/search?limit=${limit}&skip=${skip}&q=${searchQuery}`;
+      if (category) {
+        url = `https://dummyjson.com/products/category/${category}?limit=${limit}&skip=${skip}`;
+      }
+      const data = await fetch(url).then((res) => res.json());
+
+      return data;
     },
   });
+
+  // console.log(product)
 
   useEffect(() => {
     if (product) {
@@ -73,18 +84,24 @@ export default function ProductPage() {
       );
     },
     placeholderData: keepPreviousData,
+    staleTime: 20000,
   });
 
   const handleMove = (count: number) => {
     setSearchParams((prev) => {
-       // @ts-ignore
-      searchParams.set("skip", Math.max(skip + count, 0));
-      return prev;
+      const newSearchParams = new URLSearchParams(prev.toString());
+  
+      // Update the 'skip' parameter
+      const newSkip = Math.max(skip + count, 0);
+      newSearchParams.set("skip", newSkip.toString());
+  
+      return newSearchParams;
     });
     // setSkip((prevSkip) =>{
     //   return Math.max(prevSkip + count,0)
     // })
   };
+
   return (
     <>
       <Container mt="14px">
@@ -99,13 +116,25 @@ export default function ProductPage() {
                   prev.set("q", e.target.value);
                   // @ts-ignore
                   prev.set("skip", 0);
+                  prev.delete("category");
                   return prev;
                 });
               }, 1000)}
             />
           </Box>
           <Box>
-            <Select placeholder="Select the Category">
+            <Select
+              placeholder="Select the Category"
+              onChange={(e: any) => {
+                setSearchParams((prev) => {
+                  // @ts-ignore
+                  prev.set("skip", 0);
+                  prev.delete("q");
+                  prev.set("category", e.target.value);
+                  return prev;
+                });
+              }}
+            >
               {categories?.map((category: string, index: number) => (
                 <option value={category} key={index}>
                   {category}
@@ -123,7 +152,7 @@ export default function ProductPage() {
         mt="20px"
       >
         {productData &&
-        // @ts-ignore
+          // @ts-ignore
           productData?.products?.map((product: ProductType) => {
             return (
               <Card key={product.id} height="100%">
@@ -151,8 +180,16 @@ export default function ProductPage() {
 
       <Container>
         <Flex gap={"20px"} justifyContent={"space-between"} my={"20px"}>
-          <Button onClick={() => handleMove(-limit)}>Prev</Button>
-          <Button onClick={() => handleMove(limit)}>Next</Button>
+          <Button disabled={skip < limit} onClick={() => handleMove(-limit)}>
+            Prev
+          </Button>
+          <Button
+          // @ts-ignore
+            disabled={limit + skip >= productData?.total}
+            onClick={() => handleMove(limit)}
+          >
+            Next
+          </Button>
         </Flex>
       </Container>
     </>
